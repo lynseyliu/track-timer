@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        return null;
+        return inputFrame.rgba();
     }
 
     @Override
