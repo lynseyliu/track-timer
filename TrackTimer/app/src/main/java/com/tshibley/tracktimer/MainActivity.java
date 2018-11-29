@@ -1,6 +1,5 @@
 package com.tshibley.tracktimer;
 
-import android.support.v7.app.AppCompatActivity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +17,8 @@ import org.opencv.core.Size;
 
 
 public class MainActivity extends Activity implements CvCameraViewListener2 {
-    private JavaCameraView cameraView;
+    //private JavaCameraView cameraView;
+    private CameraBridgeViewBase cameraView;
     private Mat mat;
     private final Scalar green = new Scalar(0,255,0);
 
@@ -26,7 +26,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        cameraView = (JavaCameraView) findViewById(R.id.surface_view);
+        cameraView = (CameraBridgeViewBase) findViewById(R.id.surface_view);
         cameraView.setVisibility(SurfaceView.VISIBLE);
         cameraView.setCvCameraViewListener(this);
         System.loadLibrary ("opencv_java3");
