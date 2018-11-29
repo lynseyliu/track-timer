@@ -8,12 +8,12 @@
     <org.opencv.android.JavaCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone"
         android:screenOrientation="portrait"
         android:id="@+id/surface_view"
         opencv:show_fps="true"
         opencv:camera_id="any"
         android:layout_below="@+id/test_text"/>
+    <!--android:visibility="gone"-->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
