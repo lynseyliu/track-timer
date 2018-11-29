@@ -21,28 +21,6 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     private JavaCameraView cameraView;
     private Mat mat;
     private final Scalar green = new Scalar(0,255,0);
-    private int resolutionIndex = 0;
-    //private IplImage videoImage = null;
-    boolean recording = false;
-    //private volatile FFmpegFrameRecorder recorder;
-    private int imageWidth = 320;
-    private int imageHeight = 240;
-    private int frameRate = 30;
-
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                    Log.i("VideoTag", "OpenCV loaded successfully");
-                    cameraView.enableView();
-                    break;
-                default:
-                    super.onManagerConnected(status);
-                    break;
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,4 +71,19 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
 
         mat = null;
     }
+
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                    Log.i("VideoTag", "OpenCV loaded successfully");
+                    cameraView.enableView();
+                    break;
+                default:
+                    super.onManagerConnected(status);
+                    break;
+            }
+        }
+    };
 }
