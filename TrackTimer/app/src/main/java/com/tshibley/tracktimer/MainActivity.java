@@ -21,6 +21,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     private CameraBridgeViewBase cameraView;
     private Mat mat;
     private final Scalar green = new Scalar(0,255,0);
+    public static String TAG = "VideoTag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,14 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
         cameraView.setVisibility(SurfaceView.VISIBLE);
         cameraView.setCvCameraViewListener(this);
         System.loadLibrary ("opencv_java3");
+    }
+
+    static {
+        if (OpenCVLoader.initDebug()) {
+            Log.i(TAG, "OpenCV initialize success");
+        } else {
+            Log.i(TAG, "OpenCV initialize failed");
+        }
     }
 
     @Override
@@ -77,7 +86,7 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
-                    Log.i("VideoTag", "OpenCV loaded successfully");
+                    Log.i(TAG, "OpenCV loaded successfully");
                     cameraView.enableView();
                     break;
                 default:

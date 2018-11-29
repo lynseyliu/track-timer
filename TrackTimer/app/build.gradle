@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.tshibley.tracktimer"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -17,6 +17,12 @@ android {
         }
     }
     buildToolsVersion '28.0.2'
+    sourceSets { main { jni.srcDirs = ['src/main/jni', 'src/main/jniLibs/'] } }
+    externalNativeBuild {
+        ndkBuild {
+            path file('../../../../../OpenCV-android-sdk/sdk/native/jni/OpenCV.mk')
+        }
+    }
 }
 
 dependencies {
