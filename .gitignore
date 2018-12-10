@@ -1,2 +1,5 @@
 TrackTimer/openCVLibrary300/build/
 build/
+.DS_Store
+.vscode
+__pycache__
