@@ -21,7 +21,8 @@ cv2.imwrite('canny.jpg', dilated)
 mask = np.zeros(dilated.shape, dtype='uint8')
 # Draw white rectangle
 height, width = dilated.shape
-cv2.rectangle(mask, (0, int(height/2.5)), (width-1, int(height-(height/5))), (255, 255, 255), -1)
+cv2.rectangle(mask, (0, int(height/2.5)),
+              (width-1, int(height-(height/5))), (255, 255, 255), -1)
 # Apply mask to the image
 dilated = cv2.bitwise_and(dilated, dilated, mask=mask)
 
@@ -31,7 +32,7 @@ lines = cv2.HoughLinesP(
     dilated,
     rho=1,
     theta=np.pi / 180,
-    threshold=250,
+    threshold=200,
     minLineLength=400,
     maxLineGap=20)
 for line in lines:
@@ -74,9 +75,5 @@ print("process groups lines", len(_lines), len(merged_lines_all))
 for line in merged_lines_all:
     cv2.line(img2, (line[0][0], line[0][1]),
              (line[1][0], line[1][1]), (0, 0, 255), 6)
-'''
-for line in merged_lines_all:
-    for x1, y1, x2, y2 in line:
-        cv2.line(img2, (x1, y1), (x2, y2), (0, 255, 0), 2)
-'''
+
 cv2.imwrite('merged.jpg', img2)
