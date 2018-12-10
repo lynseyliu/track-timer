@@ -74,8 +74,22 @@ print("process groups lines", len(_lines), len(merged_lines_all))
 
 for line in merged_lines_all:
     if(line[0][0] > 50 and (line[1][0] < 3600 or line[1][1] > 1600)):
-        print(line)
-        cv2.line(img2, (line[0][0], line[0][1]),
-                 (line[1][0], line[1][1]), (0, 0, 255), 6)
+        x1 = line[0][0]
+        y1 = line[0][1]
+        x2 = line[1][0]
+        y2 = line[1][1]
+        if y2 < y1:
+            print(line)
+            # This is the start/finish line
+            cv2.line(img2, (x1, y1),
+                     (x2, y2), (0, 255, 255), 6)
+            # We need to get the slope and y intercept, and then draw the line across the whole track
+            slope = float(y2 - y1) / (x2 - x1)
+            print(slope)
+        else:
+            cv2.line(img2, (x1, y1),
+                     (x2, y2), (0, 0, 255), 6)
+
+# 165, 1478    1375, 1390
 
 cv2.imwrite('merged.jpg', img2)
