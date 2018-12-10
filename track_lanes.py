@@ -13,7 +13,7 @@ def get_track_lanes(img):
     track_lines = []
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imwrite('gray.jpg', gray)
+    #cv2.imwrite('images/gray.jpg', gray)
 
     high_thresh, thresh_im = cv2.threshold(
         gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -21,7 +21,7 @@ def get_track_lanes(img):
 
     edges = cv2.Canny(gray, 300, 500)
     dilated = cv2.dilate(edges, np.ones((4, 4), dtype=np.uint8))
-    #cv2.imwrite('canny.jpg', dilated)
+    #cv2.imwrite('images/canny.jpg', dilated)
 
     # Mask
     mask = np.zeros(dilated.shape, dtype='uint8')
@@ -47,7 +47,7 @@ def get_track_lanes(img):
     # for line in lines:
     #    for x1, y1, x2, y2 in line:
     #        cv2.line(img2, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    #cv2.imwrite('hough.jpg', img2)
+    #cv2.imwrite('images/hough.jpg', img2)
 
     # merge lines
     _lines = []
@@ -117,5 +117,5 @@ def get_track_lanes(img):
                 #         (x2, y2), (0, 0, 255), 6)
                 track_lines.append(line)
 
-    # cv2.imwrite('merged.jpg', img)
+    # cv2.imwrite('images/merged.jpg', img)
     return track_lines
