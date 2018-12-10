@@ -166,3 +166,20 @@ def get_distance(line1, line2):
                               line1[0][0], line1[0][1], line1[1][0], line1[1][1])
 
     return min(dist1, dist2, dist3, dist4)
+
+
+def line_intersection(line1, line2):
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
+
+    def det(a, b):
+        return float(a[0]) * float(b[1]) - float(a[1]) * float(b[0])
+
+    div = det(xdiff, ydiff)
+    if div == 0:
+        raise Exception('lines do not intersect')
+
+    d = (det(*line1), det(*line2))
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+    return x, y

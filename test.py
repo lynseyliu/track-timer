@@ -79,24 +79,35 @@ for line in merged_lines_all:
         x2 = line[1][0]
         y2 = line[1][1]
         if y2 < y1:
-            print(line)
-            # This is the start/finish line
-            # cv2.line(img2, (x1, y1),
-            #         (x2, y2), (0, 255, 255), 6)
+            # The only line that moves up as it goes across the screen is the start/finish line,
+            # so we have thar right here
+
             # We need to get the slope and y intercept, and then draw the line across the whole track
             slope = float(y2 - y1) / (x2 - x1)
-            print(slope)
             yIntercept = int(y1 - (slope * x1))
-            print(yIntercept)
-            # get the width to use for far point
-            #height, width = img2.shape
-            rightSideIntercept = int(yIntercept + (slope * width))
-            cv2.line(img2, (0, yIntercept),
-                     (width, rightSideIntercept), (0, 255, 255), 6)
+
+            # Find the edges of the track by getting the intersect of the starting
+            # line with all the lines of the track, and then using the extreme
+            # values to draw the start/finish line
+            leftTrackEdge = width
+            rightTrackEdge = 0
+            for lineCheck in merged_lines_all:
+                if(lineCheck[0][0] > 50 and (lineCheck[1][0] < 3600 or lineCheck[1][1] > 1600)):
+                    if not lineCheck[1][1] < lineCheck[0][1]:
+                        intersect = line_grouping.line_intersection(
+                            line, lineCheck)
+                        leftTrackEdge = min(intersect[0], leftTrackEdge)
+                        rightTrackEdge = max(intersect[0], rightTrackEdge)
+
+            # Get the y coordinates based on our intersect values and the previously
+            # determined slope and yIntercept values
+            yLeft = int(yIntercept + (slope * leftTrackEdge))
+            yRight = int(yIntercept + (slope * rightTrackEdge))
+            cv2.line(img2, (int(leftTrackEdge), yLeft),
+                     (int(rightTrackEdge), yRight), (0, 255, 255), 6)
         else:
             cv2.line(img2, (x1, y1),
                      (x2, y2), (0, 0, 255), 6)
 
-# 165, 1478    1375, 1390
 
 cv2.imwrite('merged.jpg', img2)
