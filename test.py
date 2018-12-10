@@ -73,7 +73,9 @@ print("process groups lines", len(_lines), len(merged_lines_all))
 
 
 for line in merged_lines_all:
-    cv2.line(img2, (line[0][0], line[0][1]),
-             (line[1][0], line[1][1]), (0, 0, 255), 6)
+    if(line[0][0] > 50 and (line[1][0] < 3600 or line[1][1] > 1600)):
+        print(line)
+        cv2.line(img2, (line[0][0], line[0][1]),
+                 (line[1][0], line[1][1]), (0, 0, 255), 6)
 
 cv2.imwrite('merged.jpg', img2)
