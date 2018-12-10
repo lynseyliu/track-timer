@@ -1,33 +1,121 @@
-import numpy as np
 import cv2
+import numpy as np
 import math
+import line_grouping
+import copy
 
-# -------- Read and process image --------
-# Read
-img = cv2.imread('lane-2.jpg')
-# Grayscale
-img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# Smooth
-img_gray = cv2.GaussianBlur(img_gray, (59,59), 0)
 
-# -------- Mask irrelevant part (top one-third?) of the image --------
-# # Create the mask base (all black)
-# mask = np.zeros(img_gray.shape, dtype='uint8')
-# # Draw a white, filled rectangle on bottom of the mask image
-# height, width = img_gray.shape
-# cv2.rectangle(mask, (0, int(height/3)), (width-1, height-1), (255, 255, 255), -1)
-# cv2.imwrite('mask.jpg', mask)
-# # Apply mask to the image
-# img_gray = cv2.bitwise_and(img_gray, img_gray, mask=mask)
+# takes in a openCV images and returns the lanes for the track as a
+# list, with the first element of the list being the starting/finish line
 
-# -------- Binarize image (to B/W) --------
-ret, img_thresh = cv2.threshold(img_gray, 60, 255, cv2.THRESH_BINARY_INV)
-img_thresh = 255 - img_thresh
+def get_track_lanes(img):
+    # The list we will be returning
+    track_lines = []
 
-# -------- Line detection --------
-# Get contours
-img_thresh, img_contours, hierarchy = cv2.findContours(img_thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-cv2.drawContours(img, img_contours, -1, (0,255,0), 3)
-print(hierarchy)
-cv2.imwrite('contours.jpg', img)
-# TODO: Use HoughLines to extract track lines from contour?
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #cv2.imwrite('gray.jpg', gray)
+
+    high_thresh, thresh_im = cv2.threshold(
+        gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    lowThresh = 0.5 * high_thresh
+
+    edges = cv2.Canny(gray, 300, 500)
+    dilated = cv2.dilate(edges, np.ones((4, 4), dtype=np.uint8))
+    #cv2.imwrite('canny.jpg', dilated)
+
+    # Mask
+    mask = np.zeros(dilated.shape, dtype='uint8')
+    # Draw white rectangle
+    height, width = dilated.shape
+    cv2.rectangle(mask, (0, int(height/2.5)),
+                  (width-1, int(height-(height/5))), (255, 255, 255), -1)
+    # Apply mask to the image
+    dilated = cv2.bitwise_and(dilated, dilated, mask=mask)
+
+    minLineLength = 100
+    maxLineGap = 10
+    lines = cv2.HoughLinesP(
+        dilated,
+        rho=1,
+        theta=np.pi / 180,
+        threshold=200,
+        minLineLength=400,
+        maxLineGap=20)
+
+    # If you need to view the houghlines uncomment the following lines:
+    #img2 = copy.deepcopy(img)
+    # for line in lines:
+    #    for x1, y1, x2, y2 in line:
+    #        cv2.line(img2, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    #cv2.imwrite('hough.jpg', img2)
+
+    # merge lines
+    _lines = []
+    for _line in line_grouping.get_lines(lines):
+        _lines.append([(_line[0], _line[1]), (_line[2], _line[3])])
+
+    # sort
+    _lines_x = []
+    _lines_y = []
+    for line_i in _lines:
+        orientation_i = math.atan2(
+            (line_i[0][1]-line_i[1][1]), (line_i[0][0]-line_i[1][0]))
+        if (abs(math.degrees(orientation_i)) > 45) and abs(math.degrees(orientation_i)) < (90+45):
+            _lines_y.append(line_i)
+        else:
+            _lines_x.append(line_i)
+
+    _lines_x = sorted(_lines_x, key=lambda _line: _line[0][0])
+    _lines_y = sorted(_lines_y, key=lambda _line: _line[0][1])
+
+    merged_lines_x = line_grouping.merge_lines_pipeline_2(_lines_x)
+    merged_lines_y = line_grouping.merge_lines_pipeline_2(_lines_y)
+
+    merged_lines_all = []
+    merged_lines_all.extend(merged_lines_x)
+    merged_lines_all.extend(merged_lines_y)
+    # print("process groups lines", len(_lines), len(merged_lines_all))
+
+    for line in merged_lines_all:
+        if(line[0][0] > 50 and (line[1][0] < 3600 or line[1][1] > 1600)):
+            x1 = line[0][0]
+            y1 = line[0][1]
+            x2 = line[1][0]
+            y2 = line[1][1]
+            if y2 < y1:
+                # The only line that moves up as it goes across the screen is the start/finish line,
+                # so we have thar right here
+
+                # We need to get the slope and y intercept, and then draw the line across the whole track
+                slope = float(y2 - y1) / (x2 - x1)
+                yIntercept = int(y1 - (slope * x1))
+
+                # Find the edges of the track by getting the intersect of the starting
+                # line with all the lines of the track, and then using the extreme
+                # values to draw the start/finish line
+                leftTrackEdge = width
+                rightTrackEdge = 0
+                for lineCheck in merged_lines_all:
+                    if(lineCheck[0][0] > 50 and (lineCheck[1][0] < 3600 or lineCheck[1][1] > 1600)):
+                        if not lineCheck[1][1] < lineCheck[0][1]:
+                            intersect = line_grouping.line_intersection(
+                                line, lineCheck)
+                            leftTrackEdge = min(intersect[0], leftTrackEdge)
+                            rightTrackEdge = max(intersect[0], rightTrackEdge)
+
+                # Get the y coordinates based on our intersect values and the previously
+                # determined slope and yIntercept values
+                yLeft = int(yIntercept + (slope * leftTrackEdge))
+                yRight = int(yIntercept + (slope * rightTrackEdge))
+                # cv2.line(img, (int(leftTrackEdge), yLeft),
+                #         (int(rightTrackEdge), yRight), (0, 255, 255), 6)
+                startLine = [(int(leftTrackEdge), yLeft),
+                             (int(rightTrackEdge), yRight)]
+                track_lines.insert(0, startLine)
+            else:
+                # cv2.line(img, (x1, y1),
+                #         (x2, y2), (0, 0, 255), 6)
+                track_lines.append(line)
+
+    # cv2.imwrite('merged.jpg', img)
+    return track_lines
