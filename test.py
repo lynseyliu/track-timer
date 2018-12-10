@@ -81,11 +81,18 @@ for line in merged_lines_all:
         if y2 < y1:
             print(line)
             # This is the start/finish line
-            cv2.line(img2, (x1, y1),
-                     (x2, y2), (0, 255, 255), 6)
+            # cv2.line(img2, (x1, y1),
+            #         (x2, y2), (0, 255, 255), 6)
             # We need to get the slope and y intercept, and then draw the line across the whole track
             slope = float(y2 - y1) / (x2 - x1)
             print(slope)
+            yIntercept = int(y1 - (slope * x1))
+            print(yIntercept)
+            # get the width to use for far point
+            #height, width = img2.shape
+            rightSideIntercept = int(yIntercept + (slope * width))
+            cv2.line(img2, (0, yIntercept),
+                     (width, rightSideIntercept), (0, 255, 255), 6)
         else:
             cv2.line(img2, (x1, y1),
                      (x2, y2), (0, 0, 255), 6)
