@@ -17,6 +17,14 @@ edges = cv2.Canny(gray, 300, 500)
 dilated = cv2.dilate(edges, np.ones((4, 4), dtype=np.uint8))
 cv2.imwrite('canny.jpg', dilated)
 
+# Mask
+mask = np.zeros(dilated.shape, dtype='uint8')
+# Draw white rectangle
+height, width = dilated.shape
+cv2.rectangle(mask, (0, int(height/2.5)), (width-1, int(height-(height/5))), (255, 255, 255), -1)
+# Apply mask to the image
+dilated = cv2.bitwise_and(dilated, dilated, mask=mask)
+
 minLineLength = 100
 maxLineGap = 10
 lines = cv2.HoughLinesP(
