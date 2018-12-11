@@ -22,8 +22,17 @@ def line_line(line1, line2):
         return False
 
 def box_line(box, line):
-    top = [ (box['x'], box['y']), (box['x'] + box['w'], box['y']) ]
-    left = [ (box['x'], box['y']), (box['x'], box['y'] + box['h']) ]
-    right = [ (box['x'] + box['w'], box['y'] + box['h']), (box['x'] + box['w'], box['y']) ]
-    bottom = [ ( int(box['x'] + box['w']), int(box['y'] + box['h']) ), ( int(box['x']), int(box['y'] + box['h']) ) ]
-    return line_line(bottom, line)
+    top = [ (int(box['x']), int(box['y'])),
+            (int(box['x'] + box['w']), int(box['y'])) ]
+    left = [ (int(box['x']), int(box['y'])), 
+             (int(box['x']), int(box['y'] + box['h'])) ]
+    right = [ (int(box['x'] + box['w']), int(box['y'] + box['h'])),
+              (int(box['x'] + box['w']), int(box['y'])) ]
+    bottom = [ (int(box['x'] + box['w']), int(box['y'] + box['h'])),
+               (int(box['x']), int(box['y'] + box['h'])) ]
+    if line_line(bottom, line) != False:
+        return line_line(bottom, line)
+    elif line_line(right, line) != False:
+        return line_line(right, line)
+    else:
+        return False
