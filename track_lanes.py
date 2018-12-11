@@ -13,45 +13,59 @@ def get_track_lanes(img):
     track_lines = []
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imwrite('images/gray.jpg', gray)
+    cv2.imwrite('images/gray_video.jpg', gray)
 
     high_thresh, thresh_im = cv2.threshold(
         gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     lowThresh = 0.5 * high_thresh
 
-    edges = cv2.Canny(gray, 300, 500)
-    dilated = cv2.dilate(edges, np.ones((4, 4), dtype=np.uint8))
-    #cv2.imwrite('images/canny.jpg', dilated)
+    edges = cv2.Canny(gray, 125, 300)
+    dilated = cv2.dilate(edges, np.ones((2, 2), dtype=np.uint8))
+    cv2.imwrite('images/canny_video.jpg', dilated)
 
     # Mask
     mask = np.zeros(dilated.shape, dtype='uint8')
     # Draw white rectangle
     height, width = dilated.shape
     cv2.rectangle(mask, (0, int(height/2.5)),
-                  (width-1, int(height-(height/5))), (255, 255, 255), -1)
+                  (width-1, int(height-(height/5.5))), (255, 255, 255), -1)
     # Apply mask to the image
     dilated = cv2.bitwise_and(dilated, dilated, mask=mask)
 
-    minLineLength = 100
-    maxLineGap = 10
     lines = cv2.HoughLinesP(
         dilated,
         rho=1,
         theta=np.pi / 180,
         threshold=200,
-        minLineLength=400,
+        minLineLength=275,
         maxLineGap=20)
 
     # If you need to view the houghlines uncomment the following lines:
-    #img2 = copy.deepcopy(img)
-    # for line in lines:
-    #    for x1, y1, x2, y2 in line:
-    #        cv2.line(img2, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    #cv2.imwrite('images/hough.jpg', img2)
+    img2 = copy.deepcopy(img)
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            cv2.line(img2, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    cv2.imwrite('images/hough_video.jpg', img2)
+
+    linesFiltered = []
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            if x2 > x1:
+                if y2 > height * .7 or x2 < width * .85:
+                    linesFiltered.append(line)
+            else:
+                if y1 > height * .7 or x1 < width * .85:
+                    linesFiltered.append(line)
+
+    img3 = copy.deepcopy(img)
+    for line in linesFiltered:
+        for x1, y1, x2, y2 in line:
+            cv2.line(img3, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    cv2.imwrite('images/hough_video_lines_filtered.jpg', img3)
 
     # merge lines
     _lines = []
-    for _line in line_grouping.get_lines(lines):
+    for _line in line_grouping.get_lines(linesFiltered):
         _lines.append([(_line[0], _line[1]), (_line[2], _line[3])])
 
     # sort
@@ -74,10 +88,11 @@ def get_track_lanes(img):
     merged_lines_all = []
     merged_lines_all.extend(merged_lines_x)
     merged_lines_all.extend(merged_lines_y)
-    # print("process groups lines", len(_lines), len(merged_lines_all))
+    print("process groups lines", len(_lines), len(merged_lines_all))
 
     for line in merged_lines_all:
-        if(line[0][0] > 50 and (line[1][0] < 3600 or line[1][1] > 1600)):
+        print(line)
+        if(line[1][0] < width * .8 or line[1][1] > height * .6):
             x1 = line[0][0]
             y1 = line[0][1]
             x2 = line[1][0]
@@ -96,7 +111,7 @@ def get_track_lanes(img):
                 leftTrackEdge = width
                 rightTrackEdge = 0
                 for lineCheck in merged_lines_all:
-                    if(lineCheck[0][0] > 50 and (lineCheck[1][0] < 3600 or lineCheck[1][1] > 1600)):
+                    if(line[1][0] < width * .8 or line[1][1] > height * .6):
                         if not lineCheck[1][1] < lineCheck[0][1]:
                             intersect = line_grouping.line_intersection(
                                 line, lineCheck)

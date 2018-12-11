@@ -3,3 +3,4 @@ build/
 .DS_Store
 .vscode
 __pycache__
+object-detection-opencv/yolov3.weights

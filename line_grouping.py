@@ -11,8 +11,8 @@ def get_lines(lines_in):
 def merge_lines_pipeline_2(lines):
     super_lines_final = []
     super_lines = []
-    min_distance_to_merge = 30
-    min_angle_to_merge = 30
+    min_distance_to_merge = 20
+    min_angle_to_merge = 10
 
     for line in lines:
         create_new_group = True
