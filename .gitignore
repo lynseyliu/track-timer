@@ -4,3 +4,6 @@ build/
 .vscode
 __pycache__
 object-detection-opencv/yolov3.weights
+images/full-lap-1.mp4
+
+

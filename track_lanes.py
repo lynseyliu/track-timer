@@ -12,6 +12,9 @@ def get_track_lanes(img):
     # The list we will be returning
     track_lines = []
 
+    # The intersection points for the starting lines we will return
+    intersecion_points = []
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     cv2.imwrite('images/gray_video.jpg', gray)
 
@@ -19,8 +22,8 @@ def get_track_lanes(img):
         gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     lowThresh = 0.5 * high_thresh
 
-    edges = cv2.Canny(gray, 125, 300)
-    dilated = cv2.dilate(edges, np.ones((2, 2), dtype=np.uint8))
+    edges = cv2.Canny(gray, 275, 550)
+    dilated = cv2.dilate(edges, np.ones((4, 4), dtype=np.uint8))
     cv2.imwrite('images/canny_video.jpg', dilated)
 
     # Mask
@@ -52,10 +55,10 @@ def get_track_lanes(img):
         for x1, y1, x2, y2 in line:
             if y1 != y2:
                 if x2 > x1:
-                    if y2 > height * .7 or x2 < width * .85:
+                    if y2 > height * .68 or x2 < width * .85:
                         linesFiltered.append(line)
                 else:
-                    if y1 > height * .7 or x1 < width * .85:
+                    if y1 > height * .68 or x1 < width * .85:
                         linesFiltered.append(line)
 
     img3 = copy.deepcopy(img)
@@ -100,7 +103,7 @@ def get_track_lanes(img):
             y2 = line[1][1]
             if y2 < y1:
                 # The only line that moves up as it goes across the screen is the start/finish line,
-                # so we have thar right here
+                # so we have that right here
 
                 # We need to get the slope and y intercept, and then draw the line across the whole track
                 slope = float(y2 - y1) / (x2 - x1)
@@ -116,6 +119,7 @@ def get_track_lanes(img):
                         if not lineCheck[1][1] < lineCheck[0][1]:
                             intersect = line_grouping.line_intersection(
                                 line, lineCheck)
+                            intersecion_points.append(intersect)
                             leftTrackEdge = min(intersect[0], leftTrackEdge)
                             rightTrackEdge = max(intersect[0], rightTrackEdge)
 
@@ -134,4 +138,8 @@ def get_track_lanes(img):
                 track_lines.append(line)
 
     # cv2.imwrite('images/merged.jpg', img)
-    return track_lines
+    result = {
+        'track_lines': track_lines,
+        'intersection_points': intersecion_points
+    }
+    return result

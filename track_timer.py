@@ -13,7 +13,7 @@ args = parser.parse_args()
 
 #cap = cv2.VideoCapture('images/test-start.mp4')
 #cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
-cap = cv2.VideoCapture('images/test.mov')
+cap = cv2.VideoCapture('images/full-lap-1.mp4')
 
 # The following code is for saving a video of the current setup
 '''rate = cap.get(cv2.CAP_PROP_FPS)
@@ -28,8 +28,10 @@ out = cv2.VideoWriter('images/output_tracklines.avi',
                       fourcc, rate, (width, height))
 '''
 
-tracklanes = []
+trackLanes = []
 startLine = []
+startLine_intersectionPoints = []
+
 count = 0
 yoloCVObj = YoloCV()
 
@@ -37,7 +39,7 @@ started = False
 finished = False
 waiting = False
 startTime = 0
-waitTime = 10 #seconds
+waitTime = 10  # seconds
 totalTime = 0
 
 numRunners = args.runners
@@ -61,7 +63,10 @@ while(True):
     # get the tracklanes for the image if this is our first frame, otherwise
     # we don't need to regenerate them and can just use the old ones
     if(count < 1):
-        trackLanes = track_lanes.get_track_lanes(frame)
+        trackLanesResult = track_lanes.get_track_lanes(frame)
+        trackLanes = trackLanesResult['track_lines']
+        startLine_intersectionPoints = trackLanesResult['intersection_points']
+        print(startLine_intersectionPoints)
 
         # get the startLine from the list and then remove
         startLine = trackLanes[0]
@@ -101,7 +106,8 @@ while(True):
         for box in currentPredictedBoxes:
             if get_intersect.box_line(box, startLine) != False:
                 p = get_intersect.box_line(box, startLine)
-                cv2.circle(frame, (int(p[0]), int(p[1])), 5, (0, 255, 0), thickness=5, lineType=8, shift=0)
+                cv2.circle(frame, (int(p[0]), int(p[1])), 5,
+                           (0, 255, 0), thickness=5, lineType=8, shift=0)
                 if not started:
                     started = True
                     startTime = datetime.now()
@@ -110,6 +116,11 @@ while(True):
                     totalTime = datetime.now() - startTime
                     finished = True
                     #cv2.putText(frame, 'Finish', (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+
+    # Find the intersection points
+    for intersection_point in startLine_intersectionPoints:
+        cv2.circle(frame, (int(intersection_point[0]), int(intersection_point[1])), 5,
+                   (255, 255, 0), thickness=10, lineType=8, shift=0)
 
     # Display the resulting frame
     try:
@@ -120,6 +131,9 @@ while(True):
     except:
         break
 
+    # if (count > 3):
+    #    break
+
     # Write out the video frame here
     # out.write(frame)
 
@@ -127,7 +141,8 @@ if args.mode == 'full':
     minutes = int(totalTime.total_seconds() / 60)
     seconds = totalTime.total_seconds() - (minutes * 60)
     milliseconds = int(totalTime.microseconds / 1000)
-    print("Total time is " + str(minutes) + ":" + str(seconds) + "." + str(milliseconds))
+    print("Total time is " + str(minutes) + ":" +
+          str(seconds) + "." + str(milliseconds))
 
 # When everything done, release the capture
 cap.release()
