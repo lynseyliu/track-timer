@@ -27,37 +27,37 @@ print(rate)
 # Define the codec and create VideoWriter object
 # fourcc = cv2.VideoWriter_fourcc(*'MPEG')
 # out = cv2.VideoWriter('images/output_tracklines.avi',
-                      fourcc, rate, (width, height))
+#                      fourcc, rate, (width, height))
 
 
-trackLanes=[]
-startLine=[]
-startLine_intersectionPoints=[]
+trackLanes = []
+startLine = []
+startLine_intersectionPoints = []
 
-count=0
-yoloCVObj=YoloCV()
+count = 0
+yoloCVObj = YoloCV()
 
-started=False
-finished=False
-waiting=False
-startTime=0
-waitTime=10  # seconds
-totalTime=0
+started = False
+finished = False
+waiting = False
+startTime = 0
+waitTime = 10  # seconds
+totalTime = 0
 
-numRunners=args.runners
+numRunners = args.runners
 if args.mode == 'start':
-    started=False
+    started = False
 elif args.mode == 'finish':
-    started=True
-    finished=False
+    started = True
+    finished = False
 elif args.mode == 'full':
-    started=False
-    finished=False
+    started = False
+    finished = False
 
-currentPredictedBoxes=[]
+currentPredictedBoxes = []
 while(True):
     # Capture frame-by-frame
-    ret, frame=cap.read()
+    ret, frame = cap.read()
 
     # Open the image and get the track lanes
     # img = cv2.imread('images/lane-2.jpg')
@@ -65,20 +65,20 @@ while(True):
     # get the tracklanes for the image if this is our first frame, otherwise
     # we don't need to regenerate them and can just use the old ones
     if(count < 1):
-        trackLanesResult=track_lanes.get_track_lanes(frame)
-        trackLanes=trackLanesResult['track_lines']
-        startLine_intersectionPoints=trackLanesResult['intersection_points']
+        trackLanesResult = track_lanes.get_track_lanes(frame)
+        trackLanes = trackLanesResult['track_lines']
+        startLine_intersectionPoints = trackLanesResult['intersection_points']
         print(startLine_intersectionPoints)
 
         # get the startLine from the list and then remove
-        startLine=trackLanes[0]
+        startLine = trackLanes[0]
         del trackLanes[0]
 
     # write the final image
     # cv2.imwrite('images/merged_video.jpg', frame)
     if(count % 3 == 0):
         try:
-            currentPredictedBoxes=yoloCVObj.getPrediction(frame)
+            currentPredictedBoxes = yoloCVObj.getPrediction(frame)
             print(currentPredictedBoxes)
         except:
             break
@@ -89,15 +89,15 @@ while(True):
 
     # Draw all the other lines
     for line in trackLanes:
-        x1=line[0][0]
-        y1=line[0][1]
-        x2=line[1][0]
-        y2=line[1][1]
+        x1 = line[0][0]
+        y1 = line[0][1]
+        x2 = line[1][0]
+        y2 = line[1][1]
         if (y1 > 0.45 * height):
             # If we didn't get the full line, extend it out
-            slope=(y1 - y2) / (x1 - x2)
-            y1=int(0.45 * height)
-            x1=int(((y1 - y2) / slope) + x2)
+            slope = (y1 - y2) / (x1 - x2)
+            y1 = int(0.45 * height)
+            x1 = int(((y1 - y2) / slope) + x2)
         cv2.line(frame, (x1, y1),
                  (x2, y2), (0, 0, 255), 6)
 
