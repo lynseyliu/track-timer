@@ -37,7 +37,7 @@ class YoloCV:
         #label = str(self.classes[class_id])
 
         #color = (self.COLORS[class_id])
-        color = (0, 255, 0)
+        color = (255, 0, 0)
 
         cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
 
