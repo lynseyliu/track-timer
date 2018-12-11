@@ -11,6 +11,9 @@ tracklanes = []
 startLine = []
 count = 0
 yoloCVObj = YoloCV()
+finishedCount = 0
+allowStart = False
+allowFinish = False
 
 currentPredictedBoxes = []
 while(True):
@@ -53,13 +56,17 @@ while(True):
              (startLine[1][0], startLine[1][1]), (0, 255, 255), 6)
 
     # detect bounding box intersection with startLine
-    crossed_line = False
+    crossedLine = False
+    numRunners = len(currentPredictedBoxes)
     for box in currentPredictedBoxes:
         if get_intersect.box_line(box, startLine) != False:
             p = get_intersect.box_line(box, startLine)
             cv2.circle(frame, (int(p[0]), int(p[1])), 5, (0, 255, 0), thickness=5, lineType=8, shift=0)
-            crossed_line = True
-    if crossed_line:
+            if finishedCount < numRunners:
+                cv2.putText(frame, 'Finish', (10, 500), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4, cv2.LINE_AA)
+                # finishedCount += 1
+            crossedLine = True
+    if crossedLine:
         print("line crossed")
 
     # Display the resulting frame
