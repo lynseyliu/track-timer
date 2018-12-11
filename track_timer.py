@@ -13,9 +13,10 @@ args = parser.parse_args()
 
 # cap = cv2.VideoCapture('images/test-start.mp4')
 # cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
-cap = cv2.VideoCapture('images/full-lap-1.mp4')
+# cap = cv2.VideoCapture('images/full-lap-1.mp4')
 # cap = cv2.VideoCapture('images/test-finish-same-time.mp4')
-#cap = cv2.VideoCapture('images/test-finish-single-runner.mp4')
+# cap = cv2.VideoCapture('images/test-finish-single-runner.mp4')
+cap = cv2.VideoCapture('images/two-runners-starting.mp4')
 
 
 # The following code is for saving a video of the current setup
@@ -27,7 +28,7 @@ print(rate)
 
 # Define the codec and create VideoWriter object
 fourcc = cv2.VideoWriter_fourcc(*'MPEG')
-out = cv2.VideoWriter('images/output_full_lap.avi',
+out = cv2.VideoWriter('images/output_two_runners_start.avi',
                       fourcc, rate, (width, height))
 
 trackLanes = []
