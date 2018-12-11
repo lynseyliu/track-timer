@@ -28,6 +28,16 @@ while(True):
         startLine = trackLanes[0]
         del trackLanes[0]
 
+    # write the final image
+    #cv2.imwrite('images/merged_video.jpg', frame)
+    if(count % 3 == 0):
+        currentPredictedBoxes = yoloCVObj.getPrediction(frame)
+        print(currentPredictedBoxes)
+
+    for box in currentPredictedBoxes:
+        yoloCVObj.draw_prediction(frame, round(box['x']), round(
+            box['y']), round(box['x'] + box['w']), round(box['y'] + box['h']), box['class_id'])
+
     # draw the startLine
     cv2.line(frame, (startLine[0][0], startLine[0][1]),
              (startLine[1][0], startLine[1][1]), (0, 255, 255), 6)
@@ -40,16 +50,6 @@ while(True):
         y2 = line[1][1]
         cv2.line(frame, (x1, y1),
                  (x2, y2), (0, 0, 255), 6)
-
-    # write the final image
-    #cv2.imwrite('images/merged_video.jpg', frame)
-    if(count % 10 == 0):
-        currentPredictedBoxes = yoloCVObj.getPrediction(frame)
-        print(currentPredictedBoxes)
-
-    for box in currentPredictedBoxes:
-        yoloCVObj.draw_prediction(frame, round(box['x']), round(
-            box['y']), round(box['x'] + box['w']), round(box['y'] + box['h']), box['class_id'])
 
     # Display the resulting frame
     cv2.imshow('frame', frame)

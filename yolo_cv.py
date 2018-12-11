@@ -3,10 +3,12 @@ import numpy as np
 
 
 class YoloCV:
+    version = 'yolov2-tiny'
     args = {
-        'config':  'object-detection-opencv/yolov3.cfg',
-        'weights': 'object-detection-opencv/yolov3.weights',
-        'classes': 'object-detection-opencv/yolov3.txt',
+        'config':  'object-detection-opencv/' + version + '.cfg',
+        'weights': 'object-detection-opencv/' + version + '.weights',
+        #'classes': 'object-detection-opencv/yolov3.txt',
+        'classes': 'object-detection-opencv/person.txt',
     }
     scale = 0.00392
     classes = None
@@ -34,7 +36,8 @@ class YoloCV:
 
         #label = str(self.classes[class_id])
 
-        color = self.COLORS[class_id]
+        #color = (self.COLORS[class_id])
+        color = (0, 255, 0)
 
         cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
 
