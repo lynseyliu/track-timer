@@ -1,7 +1,7 @@
 import track_lanes
 import numpy as np
 import cv2
-import yolo_cv
+from yolo_cv import YoloCV
 
 cap = cv2.VideoCapture('images/test-start.mp4')
 #cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
@@ -9,6 +9,9 @@ cap = cv2.VideoCapture('images/test-start.mp4')
 tracklanes = []
 startLine = []
 count = 0
+yoloCVObj = YoloCV()
+
+currentPredictedBoxes = []
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
@@ -40,7 +43,13 @@ while(True):
 
     # write the final image
     #cv2.imwrite('images/merged_video.jpg', frame)
-    # yolo_cv.getPrediction(frame)
+    if(count % 10 == 0):
+        currentPredictedBoxes = yoloCVObj.getPrediction(frame)
+        print(currentPredictedBoxes)
+
+    for box in currentPredictedBoxes:
+        yoloCVObj.draw_prediction(frame, round(box['x']), round(
+            box['y']), round(box['x'] + box['w']), round(box['y'] + box['h']), box['class_id'])
 
     # Display the resulting frame
     cv2.imshow('frame', frame)

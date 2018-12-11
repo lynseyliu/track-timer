@@ -1,66 +1,56 @@
-#############################################
-# Object detection - YOLO - OpenCV
-# Author : Arun Ponnusamy   (July 16, 2018)
-# Website : http://www.arunponnusamy.com
-############################################
-
-
 import cv2
 import numpy as np
 
-# args:
-args = {
-    'image': 'object-detection-opencv/lane-2.jpg',
-    'config':  'object-detection-opencv/yolov3.cfg',
-    'weights': 'object-detection-opencv/yolov3.weights',
-    'classes': 'object-detection-opencv/yolov3.txt',
-}
 
-
-def get_output_layers(net):
-
-    layer_names = net.getLayerNames()
-
-    output_layers = [layer_names[i[0] - 1]
-                     for i in net.getUnconnectedOutLayers()]
-
-    return output_layers
-
-
-def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h, classes, COLORS):
-
-    label = str(classes[class_id])
-
-    color = COLORS[class_id]
-
-    cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
-
-    cv2.putText(img, label, (x-10, y-10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-
-def getPrediction(image):
-    # image = cv2.imread(imagePath)
-
-    Width = image.shape[1]
-    Height = image.shape[0]
+class YoloCV:
+    args = {
+        'config':  'object-detection-opencv/yolov3.cfg',
+        'weights': 'object-detection-opencv/yolov3.weights',
+        'classes': 'object-detection-opencv/yolov3.txt',
+    }
     scale = 0.00392
-
     classes = None
+    COLORS = None
+    net = None
 
-    with open(args['classes'], 'r') as f:
-        classes = [line.strip() for line in f.readlines()]
+    def __init__(self):
+        with open(self.args['classes'], 'r') as f:
+            self.classes = [line.strip() for line in f.readlines()]
+            self.COLORS = np.random.uniform(
+                0, 255, size=(len(self.classes), 3))
+            self.net = cv2.dnn.readNet(
+                self.args['weights'], self.args['config'])
 
-        COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
+    def get_output_layers(self, net):
 
-        net = cv2.dnn.readNet(args['weights'], args['config'])
+        layer_names = net.getLayerNames()
+
+        output_layers = [layer_names[i[0] - 1]
+                         for i in net.getUnconnectedOutLayers()]
+
+        return output_layers
+
+    def draw_prediction(self, img, x, y, x_plus_w, y_plus_h, class_id):
+
+        #label = str(self.classes[class_id])
+
+        color = self.COLORS[class_id]
+
+        cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
+
+        # cv2.putText(img, label, (x-10, y-10),
+        #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+    def getPrediction(self, image):
+        Width = image.shape[1]
+        Height = image.shape[0]
 
         blob = cv2.dnn.blobFromImage(
-            image, scale, (416, 416), (0, 0, 0), True, crop=False)
+            image, self.scale, (416, 416), (0, 0, 0), True, crop=False)
 
-        net.setInput(blob)
+        self.net.setInput(blob)
 
-        outs = net.forward(get_output_layers(net))
+        outs = self.net.forward(self.get_output_layers(self.net))
 
         class_ids = []
         confidences = []
@@ -87,6 +77,8 @@ def getPrediction(image):
         indices = cv2.dnn.NMSBoxes(
             boxes, confidences, conf_threshold, nms_threshold)
 
+        boxesResult = []
+
         for i in indices:
             i = i[0]
             box = boxes[i]
@@ -94,8 +86,17 @@ def getPrediction(image):
             y = box[1]
             w = box[2]
             h = box[3]
-            draw_prediction(image, class_ids[i], confidences[i], round(
-                x), round(y), round(x+w), round(y+h), classes, COLORS)
+            box_data = {
+                'x': x,
+                'y': y,
+                'w': w,
+                'h': h,
+                'class_id': class_ids[i]
+            }
+            boxesResult.append(box_data)
+            # self.draw_prediction(image, class_ids[i], confidences[i], round(
+            #    x), round(y), round(x+w), round(y+h))
+        return boxesResult
 
         # cv2.imwrite("object-detection.jpg", image)
         # cv2.destroyAllWindows()
