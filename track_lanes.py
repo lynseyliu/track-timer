@@ -27,7 +27,7 @@ def get_track_lanes(img):
     mask = np.zeros(dilated.shape, dtype='uint8')
     # Draw white rectangle
     height, width = dilated.shape
-    cv2.rectangle(mask, (0, int(height/2.5)),
+    cv2.rectangle(mask, (0, int(height/2.42)),
                   (width-1, int(height-(height/5.5))), (255, 255, 255), -1)
     # Apply mask to the image
     dilated = cv2.bitwise_and(dilated, dilated, mask=mask)
@@ -50,12 +50,13 @@ def get_track_lanes(img):
     linesFiltered = []
     for line in lines:
         for x1, y1, x2, y2 in line:
-            if x2 > x1:
-                if y2 > height * .7 or x2 < width * .85:
-                    linesFiltered.append(line)
-            else:
-                if y1 > height * .7 or x1 < width * .85:
-                    linesFiltered.append(line)
+            if y1 != y2:
+                if x2 > x1:
+                    if y2 > height * .7 or x2 < width * .85:
+                        linesFiltered.append(line)
+                else:
+                    if y1 > height * .7 or x1 < width * .85:
+                        linesFiltered.append(line)
 
     img3 = copy.deepcopy(img)
     for line in linesFiltered:
