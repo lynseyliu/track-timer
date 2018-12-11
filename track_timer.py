@@ -1,6 +1,7 @@
 import track_lanes
 import numpy as np
 import cv2
+import yolo_cv
 
 cap = cv2.VideoCapture('images/test-start.mp4')
 #cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
@@ -39,6 +40,7 @@ while(True):
 
     # write the final image
     #cv2.imwrite('images/merged_video.jpg', frame)
+    # yolo_cv.getPrediction(frame)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
