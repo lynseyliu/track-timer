@@ -31,8 +31,9 @@ def box_line(box, line):
     bottom = [ (int(box['x'] + box['w']), int(box['y'] + box['h'])),
                (int(box['x']), int(box['y'] + box['h'])) ]
     if line_line(bottom, line) != False:
-        return line_line(bottom, line)
+        return line_line(bottom, line), "bottom"
     elif line_line(right, line) != False:
-        return line_line(right, line)
+        return line_line(right, line), "right"
+        #if p_distance(line_line(right, line), (int(box['x'] + box['w']), int(box['y'] + box['h']))) < 100:
     else:
         return False
