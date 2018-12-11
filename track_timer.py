@@ -1,10 +1,11 @@
 import track_lanes
+import get_intersect
 import numpy as np
 import cv2
 from yolo_cv import YoloCV
 
-cap = cv2.VideoCapture('images/test-start.mp4')
-#cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
+#cap = cv2.VideoCapture('images/test-start.mp4')
+cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
 
 # The following code is for saving a video of the current setup
 '''rate = cap.get(cv2.CAP_PROP_FPS)
@@ -51,10 +52,6 @@ while(True):
         yoloCVObj.draw_prediction(frame, round(box['x']), round(
             box['y']), round(box['x'] + box['w']), round(box['y'] + box['h']), box['class_id'])
 
-    # draw the startLine
-    cv2.line(frame, (startLine[0][0], startLine[0][1]),
-             (startLine[1][0], startLine[1][1]), (0, 255, 255), 6)
-
     # draw all the other lines
     for line in trackLanes:
         x1 = line[0][0]
@@ -63,6 +60,20 @@ while(True):
         y2 = line[1][1]
         cv2.line(frame, (x1, y1),
                  (x2, y2), (0, 0, 255), 6)
+
+    # draw the startLine
+    cv2.line(frame, (startLine[0][0], startLine[0][1]),
+             (startLine[1][0], startLine[1][1]), (0, 255, 255), 6)
+
+    # detect bounding box intersection with startLine
+    crossed_line = False
+    for box in currentPredictedBoxes:
+        if get_intersect.box_line(box, startLine) != False:
+            p = get_intersect.box_line(box, startLine)
+            cv2.circle(frame, (int(p[0]), int(p[1])), 5, (0, 255, 0), thickness=5, lineType=8, shift=0)
+            crossed_line = True
+    if crossed_line:
+        print("line crossed")
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
