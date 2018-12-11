@@ -11,9 +11,11 @@ parser.add_argument('--mode', default='full', help='start, finish, or full')
 parser.add_argument('--runners', default=1, type=int, help='number of runners')
 args = parser.parse_args()
 
-#cap = cv2.VideoCapture('images/test-start.mp4')
-#cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
-cap = cv2.VideoCapture('images/full-lap-1.mp4')
+# cap = cv2.VideoCapture('images/test-start.mp4')
+# cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
+# cap = cv2.VideoCapture('images/full-lap-1.mp4')
+cap = cv2.VideoCapture('images/test-finish-same-time.mp4')
+
 
 # The following code is for saving a video of the current setup
 rate = cap.get(cv2.CAP_PROP_FPS)
@@ -71,7 +73,7 @@ while(True):
         del trackLanes[0]
 
     # write the final image
-    #cv2.imwrite('images/merged_video.jpg', frame)
+    # cv2.imwrite('images/merged_video.jpg', frame)
     if(count % 3 == 0):
         try:
             currentPredictedBoxes = yoloCVObj.getPrediction(frame)
@@ -89,6 +91,11 @@ while(True):
         y1 = line[0][1]
         x2 = line[1][0]
         y2 = line[1][1]
+        if (y1 > 0.45 * height):
+            # If we didn't get the full line, extend it out
+            slope = (y1 - y2) / (x1 - x2)
+            y1 = int(0.45 * height)
+            x1 = int(((y1 - y2) / slope) + x2)
         cv2.line(frame, (x1, y1),
                  (x2, y2), (0, 0, 255), 6)
 
