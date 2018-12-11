@@ -7,6 +7,19 @@ from yolo_cv import YoloCV
 #cap = cv2.VideoCapture('images/test-start.mp4')
 cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
 
+# The following code is for saving a video of the current setup
+'''rate = cap.get(cv2.CAP_PROP_FPS)
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+print('Frame Rate')
+print(rate)
+
+# Define the codec and create VideoWriter object
+fourcc = cv2.VideoWriter_fourcc(*'MPEG')
+out = cv2.VideoWriter('images/output_tracklines.avi',
+                      fourcc, rate, (width, height))
+'''
+
 tracklanes = []
 startLine = []
 count = 0
@@ -74,6 +87,9 @@ while(True):
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     count += 1
+
+    # Write out the video frame here
+    # out.write(frame)
 
 # When everything done, release the capture
 cap.release()
