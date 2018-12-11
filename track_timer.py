@@ -13,8 +13,9 @@ args = parser.parse_args()
 
 # cap = cv2.VideoCapture('images/test-start.mp4')
 # cap = cv2.VideoCapture('images/finish-lane1and2.mp4')
-# cap = cv2.VideoCapture('images/full-lap-1.mp4')
-cap = cv2.VideoCapture('images/test-finish-same-time.mp4')
+cap = cv2.VideoCapture('images/full-lap-1.mp4')
+# cap = cv2.VideoCapture('images/test-finish-same-time.mp4')
+#cap = cv2.VideoCapture('images/test-finish-single-runner.mp4')
 
 
 # The following code is for saving a video of the current setup
@@ -33,6 +34,7 @@ print(rate)
 trackLanes = []
 startLine = []
 startLine_intersectionPoints = []
+intersectPointsSorted = []
 
 count = 0
 yoloCVObj = YoloCV()
@@ -69,7 +71,12 @@ while(True):
         trackLanes = trackLanesResult['track_lines']
         startLine_intersectionPoints = trackLanesResult['intersection_points']
         print(startLine_intersectionPoints)
-
+        temp = []
+        for sl in startLine_intersectionPoints:
+            intersect_x = int(sl[0])
+            temp.append(intersect_x)
+        intersectPointsSorted = sorted(temp)
+        print(intersectPointsSorted)
         # get the startLine from the list and then remove
         startLine = trackLanes[0]
         del trackLanes[0]
@@ -113,6 +120,22 @@ while(True):
         for box in currentPredictedBoxes:
             if get_intersect.box_line(box, startLine) != False:
                 p = get_intersect.box_line(box, startLine)
+                print(box)
+                # bottom line coordinates
+                bottom_x1 = box['x']
+                bottom_y1 = box['y'] + box['h']
+                bottom_x2 = box['x'] + box['w']
+                bottom_y2 = box['y'] + box['h']
+                bottom_mid_x = box['x'] + (box['w'] / 400)
+                print('the bottom mid of the bounding box')
+                print(bottom_mid_x)
+                index = len(intersectPointsSorted) - 1
+                for item in intersectPointsSorted:
+                    if(bottom_mid_x > item):
+                        index -= 1
+                index = max(index, 1)
+                print('the lane:')
+                print(index)
                 cv2.circle(frame, (int(p[0]), int(p[1])), 5,
                            (0, 255, 0), thickness=5, lineType=8, shift=0)
                 if not started:
